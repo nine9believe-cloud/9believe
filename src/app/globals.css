@@ -1,0 +1,228 @@
+/* ============================================================
+   9believe — global styles
+   Tokens transcribed from the Claude Design handoff bundle
+   (_ds/9believe-design-system: fig-tokens, typography, spacing, base).
+   Light theme only, per design direction.
+   ============================================================ */
+
+/* ---- LINE Seed Sans TH (local) ---- */
+@font-face {
+  font-family: "LINE Seed Sans TH";
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+  src: url("/fonts/LINESeedSansTH_W_Th.woff2") format("woff2");
+}
+@font-face {
+  font-family: "LINE Seed Sans TH";
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+  src: url("/fonts/LINESeedSansTH_W_Rg.woff2") format("woff2");
+}
+@font-face {
+  font-family: "LINE Seed Sans TH";
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+  src: url("/fonts/LINESeedSansTH_W_Bd.woff2") format("woff2");
+}
+@font-face {
+  font-family: "LINE Seed Sans TH";
+  font-weight: 800;
+  font-style: normal;
+  font-display: swap;
+  src: url("/fonts/LINESeedSansTH_W_XBd.woff2") format("woff2");
+}
+@font-face {
+  font-family: "LINE Seed Sans TH";
+  font-weight: 900;
+  font-style: normal;
+  font-display: swap;
+  src: url("/fonts/LINESeedSansTH_W_He.woff2") format("woff2");
+}
+
+:root {
+  /* ---- Brand palette ---- */
+  --brand-25: rgb(255, 252, 249);
+  --brand-50: rgb(246, 242, 239);
+  --brand-100: rgb(227, 216, 204);
+  --brand-200: rgb(214, 197, 180);
+  --brand-300: rgb(195, 171, 145);
+  --brand-400: rgb(184, 154, 124);
+  --brand-500: rgb(166, 129, 91);
+  --brand-600: rgb(151, 117, 83);
+  --brand-700: rgb(118, 92, 65);
+  --brand-800: rgb(91, 71, 50);
+
+  /* ---- Gray (light) ---- */
+  --gray-light-25: rgb(252, 252, 253);
+  --gray-light-50: rgb(249, 250, 251);
+  --gray-light-100: rgb(242, 244, 247);
+  --gray-light-200: rgb(234, 236, 240);
+  --gray-light-300: rgb(208, 213, 221);
+  --gray-light-400: rgb(152, 162, 179);
+  --gray-light-500: rgb(102, 112, 133);
+  --gray-light-600: rgb(71, 84, 103);
+  --gray-light-700: rgb(52, 64, 84);
+  --gray-light-800: rgb(24, 34, 48);
+  --gray-light-900: rgb(16, 24, 40);
+  --gray-light-950: rgb(12, 17, 29);
+
+  /* ---- Status palettes ---- */
+  --error-50: rgb(254, 243, 242);
+  --error-100: rgb(254, 228, 226);
+  --error-300: rgb(253, 162, 155);
+  --error-400: rgb(249, 112, 102);
+  --error-500: rgb(240, 68, 56);
+  --error-600: rgb(217, 45, 32);
+  --error-700: rgb(180, 35, 24);
+  --success-50: rgb(236, 253, 243);
+  --success-100: rgb(220, 250, 230);
+  --success-500: rgb(23, 178, 106);
+  --success-600: rgb(7, 148, 85);
+  --warning-50: rgb(255, 250, 235);
+  --warning-400: rgb(253, 176, 34);
+  --warning-600: rgb(220, 104, 3);
+  --warning-700: rgb(181, 71, 8);
+
+  /* ---- Semantic aliases (light) ---- */
+  --base-white: rgb(255, 255, 255);
+  --bg-primary: var(--base-white);
+  --bg-secondary: var(--gray-light-50);
+  --bg-tertiary: var(--gray-light-100);
+  --bg-brand-primary: var(--brand-50);
+  --bg-brand-secondary: var(--brand-100);
+  --bg-brand-solid: var(--brand-600);
+  --bg-disabled: var(--gray-light-100);
+  --bg-disabled-subtle: var(--gray-light-50);
+  --border-primary: var(--gray-light-300);
+  --border-secondary: var(--gray-light-200);
+  --border-brand: var(--brand-400);
+  --border-error: var(--error-300);
+  --border-disabled: var(--gray-light-200);
+  --fg-primary: var(--gray-light-900);
+  --fg-secondary: var(--gray-light-700);
+  --fg-quaternary: var(--gray-light-500);
+  --fg-brand-primary: var(--brand-600);
+  --fg-disabled: var(--gray-light-400);
+  --fg-error-primary: var(--error-600);
+  --text-primary: var(--gray-light-900);
+  --text-secondary: var(--gray-light-700);
+  --text-tertiary: var(--gray-light-600);
+  --text-quaternary: var(--gray-light-500);
+  --text-disabled: var(--gray-light-400);
+  --text-placholder: var(--gray-light-400);
+  --text-brand-primary: var(--brand-600);
+  --text-brand-secondary: var(--brand-700);
+  --text-error-primary: var(--error-600);
+  --text-success-primary: var(--success-600);
+  --text-white: var(--base-white);
+
+  /* ---- Typography ---- */
+  --font-display: "LINE Seed Sans TH", -apple-system, "Segoe UI", sans-serif;
+  --font-heading: "LINE Seed Sans TH", -apple-system, "Segoe UI", sans-serif;
+  --font-body: "LINE Seed Sans TH", -apple-system, "Segoe UI", sans-serif;
+  --body-sm-size: 14px;
+  --body-sm-line: 20px;
+  --body-md-size: 16px;
+  --body-md-line: 24px;
+  --button-label-size: 16px;
+  --button-label-line: 24px;
+
+  /* ---- Radius ---- */
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-xl: 12px;
+  --radius-3xl: 16px;
+  --radius-4xl: 20px;
+  --radius-5xl: 24px;
+  --radius-full: 9999px;
+
+  /* ---- Elevation ---- */
+  --shadow-xs: 0px 1px 2px rgba(16, 24, 40, 0.05);
+  --shadow-sm: 0px 1px 3px rgba(16, 24, 40, 0.1), 0px 1px 2px rgba(16, 24, 40, 0.06);
+  --shadow-card: 0px 12px 24px -4px rgba(16, 24, 40, 0.08), 0px 0px 2px rgba(16, 24, 40, 0.06);
+  --shadow-dropdown: 0px 20px 40px -4px rgba(16, 24, 40, 0.12), 0px 0px 2px rgba(16, 24, 40, 0.05);
+  --shadow-dialog: 0px 40px 80px -8px rgba(16, 24, 40, 0.2);
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  color-scheme: light;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: var(--font-body);
+  font-size: var(--body-md-size);
+  line-height: var(--body-md-line);
+  color: var(--text-primary);
+  background: var(--gray-light-200);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  margin: 0;
+  font-family: var(--font-heading);
+  color: var(--text-primary);
+}
+
+p { margin: 0; }
+
+button, input, textarea, select {
+  font-family: inherit;
+  font-size: inherit;
+}
+button { font-family: var(--font-body); }
+
+/* Mobile app shell: full viewport on phones, centered column on larger screens */
+.app-shell {
+  position: relative;
+  margin: 0 auto;
+  width: 100%;
+  max-width: 430px;
+  min-height: 100vh;
+  min-height: 100dvh;
+  background: var(--bg-secondary);
+  display: flex;
+  flex-direction: column;
+  overflow-x: hidden;
+}
+@media (min-width: 431px) {
+  .app-shell {
+    box-shadow: 0 0 40px rgba(16, 24, 40, 0.12);
+  }
+}
+
+*::-webkit-scrollbar { display: none; }
+* { scrollbar-width: none; }
+
+/* skeleton shimmer */
+.sk {
+  background: linear-gradient(90deg, var(--gray-light-200) 25%, var(--gray-light-100) 50%, var(--gray-light-200) 75%);
+  background-size: 200% 100%;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .sk { animation: shimmer 1.4s infinite linear; }
+  .pulse { animation: pulse9b 1.8s infinite ease-in-out; }
+}
+@keyframes shimmer {
+  to { background-position: -200% 0; }
+}
+@keyframes pulse9b {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.07); }
+}
