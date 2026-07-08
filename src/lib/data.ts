@@ -66,7 +66,7 @@ export const NOTE_CHIPS = ["ไม่ต้องกดกริ่ง", "วา
    per the approved design unless the code is updated together. */
 export const SHOP_HOURS = {
   openHour: Number(process.env.SHOP_OPEN_HOUR ?? 9),
-  closeHour: Number(process.env.SHOP_CLOSE_HOUR ?? 17),
+  closeHour: Number(process.env.SHOP_CLOSE_HOUR ?? 23),
 };
 
 /* ---- Cart / order line ---- */

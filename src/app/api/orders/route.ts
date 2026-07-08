@@ -13,7 +13,7 @@ const IMAGE_EXT: Record<string, string> = {
 
 /* POST — customer places an order (multipart: order JSON + slip image) */
 export async function POST(req: NextRequest) {
-  const open = getSetting("shop_open", "1") === "1" && withinShopHours();
+  const open = (await getSetting("shop_open", "1")) === "1" && withinShopHours();
   if (!open) {
     return NextResponse.json({ error: "ร้านปิดอยู่ตอนนี้ · ร้านเปิด 9:00–17:00" }, { status: 409 });
   }
@@ -46,13 +46,13 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "รองรับเฉพาะรูปภาพ" }, { status: 400 });
   }
 
-  getDb(); // ensure dirs exist
+  await getDb(); // ensure upload dirs + schema exist
   const fileName = `${Date.now()}-${crypto.randomUUID().slice(0, 8)}.${ext}`;
   const rel = path.join("slips", fileName);
   const buf = Buffer.from(await slip.arrayBuffer());
   fs.writeFileSync(path.join(UPLOADS_DIR, rel), buf);
 
-  const { id, token } = createOrder(items, contact, rel);
+  const { id, token } = await createOrder(items, contact, rel);
   return NextResponse.json({ id, token });
 }
 
@@ -61,18 +61,21 @@ export async function GET() {
   if (!(await isAdmin())) {
     return NextResponse.json({ error: "unauthorized" }, { status: 401 });
   }
-  const rows = getDb()
-    .prepare("SELECT * FROM orders ORDER BY created_at DESC LIMIT 200")
-    .all() as { items: string; chips: string; times: string; slip_path: string | null; reviewed: number; [k: string]: unknown }[];
+  const db = await getDb();
+  const { rows } = await db.query<{
+    id: string; created_at: number; items: unknown; total: number;
+    name: string; phone: string; house: string; chips: unknown; extra: string;
+    status: string; times: unknown; slip_path: string | null; reviewed: boolean;
+  }>("SELECT * FROM orders ORDER BY created_at DESC LIMIT 200");
   return NextResponse.json(
     rows.map((r) => ({
       id: r.id,
       createdAt: r.created_at,
-      items: JSON.parse(r.items),
+      items: r.items,
       total: r.total,
-      contact: { name: r.name, phone: r.phone, house: r.house, chips: JSON.parse(r.chips), extra: r.extra },
+      contact: { name: r.name, phone: r.phone, house: r.house, chips: r.chips, extra: r.extra },
       status: r.status,
-      times: JSON.parse(r.times),
+      times: r.times,
       slipUrl: r.slip_path ? `/api/admin/files/${encodeURIComponent(String(r.slip_path))}` : null,
       reviewed: Boolean(r.reviewed),
     }))

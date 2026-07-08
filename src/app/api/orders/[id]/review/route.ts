@@ -12,7 +12,7 @@ const IMAGE_EXT: Record<string, string> = {
 /* POST — customer submits a review for a delivered order */
 export async function POST(req: NextRequest, ctx: { params: Promise<{ id: string }> }) {
   const { id } = await ctx.params;
-  const row = getOrderRow(id);
+  const row = await getOrderRow(id);
   if (!row) return NextResponse.json({ error: "not found" }, { status: 404 });
 
   const token = req.nextUrl.searchParams.get("t") || "";
@@ -45,9 +45,11 @@ export async function POST(req: NextRequest, ctx: { params: Promise<{ id: string
     fs.writeFileSync(path.join(UPLOADS_DIR, photoPath), Buffer.from(await photo.arrayBuffer()));
   }
 
-  const db = getDb();
-  db.prepare("INSERT INTO reviews (order_id, stars, text, photo_path, created_at) VALUES (?, ?, ?, ?, ?)")
-    .run(id, stars, text, photoPath, Date.now());
-  db.prepare("UPDATE orders SET reviewed = 1 WHERE id = ?").run(id);
+  const db = await getDb();
+  await db.query(
+    "INSERT INTO reviews (order_id, stars, text, photo_path, created_at) VALUES ($1, $2, $3, $4, $5)",
+    [id, stars, text, photoPath, Date.now()]
+  );
+  await db.query("UPDATE orders SET reviewed = true WHERE id = $1", [id]);
   return NextResponse.json({ ok: true });
 }

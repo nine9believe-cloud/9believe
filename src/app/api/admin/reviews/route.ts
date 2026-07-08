@@ -7,9 +7,10 @@ export async function GET() {
   if (!(await isAdmin())) {
     return NextResponse.json({ error: "unauthorized" }, { status: 401 });
   }
-  const rows = getDb()
-    .prepare("SELECT * FROM reviews ORDER BY created_at DESC LIMIT 200")
-    .all() as { id: number; order_id: string; stars: number; text: string; photo_path: string | null; created_at: number }[];
+  const db = await getDb();
+  const { rows } = await db.query<{
+    id: number; order_id: string; stars: number; text: string; photo_path: string | null; created_at: number;
+  }>("SELECT * FROM reviews ORDER BY created_at DESC LIMIT 200");
   return NextResponse.json(
     rows.map((r) => ({
       id: r.id,

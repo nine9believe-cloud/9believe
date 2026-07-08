@@ -6,7 +6,7 @@ import { STATUS_ORDER, OrderStatus } from "@/lib/data";
 /* GET — customer polls order status (requires the order token) */
 export async function GET(req: NextRequest, ctx: { params: Promise<{ id: string }> }) {
   const { id } = await ctx.params;
-  const row = getOrderRow(id);
+  const row = await getOrderRow(id);
   if (!row) return NextResponse.json({ error: "not found" }, { status: 404 });
 
   const token = req.nextUrl.searchParams.get("t") || "";
@@ -27,7 +27,7 @@ export async function PATCH(req: NextRequest, ctx: { params: Promise<{ id: strin
   if (!STATUS_ORDER.includes(status)) {
     return NextResponse.json({ error: "bad status" }, { status: 400 });
   }
-  const row = updateStatus(id, status);
+  const row = await updateStatus(id, status);
   if (!row) return NextResponse.json({ error: "not found" }, { status: 404 });
   return NextResponse.json(rowToView(row));
 }
