@@ -47,7 +47,7 @@ export default function CartPage() {
                 >
                   <Icon name="delete-02" size={18} />
                 </IconButtonCircle>
-                <ProductImage id={l.id} w={64} h={64} r={12} />
+                <ProductImage src={l.image} w={64} h={64} r={12} />
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div style={{
                     fontFamily: "var(--font-heading)", fontWeight: 500, fontSize: 16,

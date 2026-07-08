@@ -1,5 +1,4 @@
-/* Shared domain data — menu, categories, order steps.
-   Copy is verbatim from the approved Claude Design prototype. */
+/* Shared domain data — menu, categories, order steps. */
 
 export type MenuItem = {
   id: string;
@@ -9,6 +8,7 @@ export type MenuItem = {
   milk: boolean;
   rec: boolean;
   desc: string;
+  image: string;
 };
 
 export const CATS = [
@@ -23,21 +23,6 @@ export const CAT_LABEL: Record<string, string> = {
   thai: "ชาไทย",
   milk: "ชานม",
 };
-
-export const MENU: MenuItem[] = [
-  { id: "matcha-latte", name: "มัจฉะลาเต้", price: 70, cat: "matcha", milk: true, rec: true,
-    desc: "มัจฉะเข้มข้นกับนมสดหอมมัน ตีสดแก้วต่อแก้ว" },
-  { id: "pure-matcha", name: "เพียวมัจฉะ", price: 60, cat: "matcha", milk: false, rec: true,
-    desc: "มัจฉะล้วนตีด้วยฉะเซ็น หอมกลิ่นชาเขียวเต็มแก้ว" },
-  { id: "matcha-coconut", name: "มัจฉะมะพร้าว", price: 70, cat: "matcha", milk: false, rec: false,
-    desc: "มัจฉะกับน้ำมะพร้าวหอม สดชื่นกำลังดี" },
-  { id: "hojicha", name: "โฮจิฉะ", price: 70, cat: "matcha", milk: true, rec: false,
-    desc: "ชาคั่วหอมกรุ่น อบอุ่นละมุนเข้ากับนม" },
-  { id: "thai-tea", name: "ชาไทยไม่ใส่สี", price: 70, cat: "thai", milk: true, rec: true,
-    desc: "ชาไทยรสเข้ม ไม่ใส่สี ไม่แต่งกลิ่น" },
-  { id: "million-mile", name: "ชานมหอมหมื่นลี้", price: 60, cat: "milk", milk: true, rec: false,
-    desc: "ชานมกลิ่นหอมลอยไกล หวานมันกำลังดี" },
-];
 
 export const SWEETS = ["ไม่หวาน", "หวานน้อย", "หวานปกติ"] as const;
 export const OAT_EXTRA = 10;
@@ -76,6 +61,7 @@ export type CartLine = {
   id: string;
   name: string;
   price: number;
+  image: string;
   sweet: string;
   oat: boolean;
   qty: number;

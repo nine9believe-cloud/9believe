@@ -13,10 +13,10 @@ type CSS = React.CSSProperties;
 /* ---------- product image ---------- */
 
 export function ProductImage({
-  id, w, h, r = 16, style = {},
-}: { id: string; w: number | string; h: number | string; r?: number; style?: CSS }) {
+  src, w, h, r = 16, style = {},
+}: { src: string; w: number | string; h: number | string; r?: number; style?: CSS }) {
   /* eslint-disable-next-line @next/next/no-img-element */
-  return <img src={`/images/menu/${id}.webp`} alt="" style={{
+  return <img src={src || "/images/9believe-logo-mark.png"} alt="" style={{
     width: w, height: h, borderRadius: r, objectFit: "cover", flexShrink: 0, display: "block", ...style,
   }} />;
 }
@@ -44,7 +44,7 @@ export function ProductCard({ item, closed }: { item: MenuItem; closed: boolean 
         background: "var(--bg-primary)", borderRadius: 20, boxShadow: "var(--shadow-card)",
       }}
     >
-      <ProductImage id={item.id} w={104} h={104} r={16} />
+      <ProductImage src={item.image} w={104} h={104} r={16} />
       <div style={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column", gap: 4 }}>
         <div style={{
           fontFamily: "var(--font-heading)", fontWeight: 500, fontSize: 18,

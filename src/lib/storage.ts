@@ -28,3 +28,8 @@ export async function downloadFile(relPath: string): Promise<{ buffer: Buffer; c
   const buffer = Buffer.from(await data.arrayBuffer());
   return { buffer, contentType: data.type || "application/octet-stream" };
 }
+
+export async function deleteFile(relPath: string): Promise<void> {
+  const { error } = await getClient().storage.from(BUCKET).remove([relPath]);
+  if (error) throw error;
+}

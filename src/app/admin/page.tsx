@@ -2,8 +2,12 @@
 
 import React from "react";
 import { Icon } from "@/components/Icon";
-import { BottomFixedButton, Button, Chip, Divider, TextField, Toggle } from "@/components/ds";
-import { CartLine, OrderStatus, STATUS_ORDER, STEPS } from "@/lib/data";
+import {
+  BottomFixedButton, Button, Checkbox, Chip, Dialog, Divider,
+  IconButtonCircle, TextField, Textarea, Toggle,
+} from "@/components/ds";
+import { CartLine, CAT_LABEL, CATS, MenuItem, OrderStatus, STATUS_ORDER, STEPS } from "@/lib/data";
+import { AdminMenuItem } from "@/lib/menu";
 import { baht, optionText, lineUnit } from "@/lib/format";
 
 /* หน้าร้าน (เจ้าของ) — จัดการออเดอร์ ตรวจสลิป อัปเดตสถานะ เปิด/ปิดร้าน */
@@ -114,16 +118,18 @@ function Login({ onOk }: { onOk: () => void }) {
 /* ---------- dashboard ---------- */
 
 function Dashboard({ onLogout }: { onLogout: () => void }) {
-  const [tab, setTab] = React.useState<"orders" | "reviews">("orders");
+  const [tab, setTab] = React.useState<"orders" | "reviews" | "menu">("orders");
   const [adminOpen, setAdminOpen] = React.useState(true);
   const [orders, setOrders] = React.useState<AdminOrder[]>([]);
   const [reviews, setReviews] = React.useState<Review[]>([]);
+  const [menuItems, setMenuItems] = React.useState<AdminMenuItem[]>([]);
   const [openId, setOpenId] = React.useState<string | null>(null);
 
   const load = React.useCallback(() => {
     fetch("/api/shop").then((r) => r.json()).then((d) => setAdminOpen(Boolean(d.adminOpen))).catch(() => {});
     fetch("/api/orders").then((r) => (r.ok ? r.json() : [])).then(setOrders).catch(() => {});
     fetch("/api/admin/reviews").then((r) => (r.ok ? r.json() : [])).then(setReviews).catch(() => {});
+    fetch("/api/admin/menu").then((r) => (r.ok ? r.json() : [])).then(setMenuItems).catch(() => {});
   }, []);
 
   React.useEffect(() => {
@@ -206,8 +212,12 @@ function Dashboard({ onLogout }: { onLogout: () => void }) {
           <Toggle checked={adminOpen} onChange={toggleShop} />
         </div>
         {/* tabs */}
-        <div style={{ marginTop: 14, display: "flex", gap: 8 }}>
-          {([["orders", `ออเดอร์ (${active.length})`], ["reviews", `รีวิว (${reviews.length})`]] as const).map(([id, label]) => {
+        <div style={{ marginTop: 14, display: "flex", gap: 8, overflowX: "auto" }}>
+          {([
+            ["orders", `ออเดอร์ (${active.length})`],
+            ["reviews", `รีวิว (${reviews.length})`],
+            ["menu", `เมนู (${menuItems.length})`],
+          ] as const).map(([id, label]) => {
             const sel = tab === id;
             return (
               <button
@@ -239,6 +249,8 @@ function Dashboard({ onLogout }: { onLogout: () => void }) {
                 onAdvance={() => advance(o)} />
             ))}
           </>
+        ) : tab === "menu" ? (
+          <MenuTab items={menuItems} onChange={load} />
         ) : (
           <>
             {reviews.length === 0 && (
@@ -370,6 +382,236 @@ function OrderCard({ o, open, onToggle, onAdvance }: {
           )}
         </div>
       )}
+    </div>
+  );
+}
+
+/* ---------- menu management (master list CRUD) ---------- */
+
+function MenuTab({ items, onChange }: { items: AdminMenuItem[]; onChange: () => void }) {
+  const [formOpen, setFormOpen] = React.useState(false);
+  const [editingItem, setEditingItem] = React.useState<AdminMenuItem | null>(null);
+  const [deleting, setDeleting] = React.useState<AdminMenuItem | null>(null);
+  const [busy, setBusy] = React.useState(false);
+
+  const openCreate = () => { setEditingItem(null); setFormOpen(true); };
+  const openEdit = (m: AdminMenuItem) => { setEditingItem(m); setFormOpen(true); };
+
+  const toggleActive = async (m: AdminMenuItem, active: boolean) => {
+    const res = await fetch(`/api/admin/menu/${m.id}/active`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ active }),
+    }).catch(() => null);
+    if (res && res.ok) onChange();
+  };
+
+  const remove = async () => {
+    if (!deleting || busy) return;
+    setBusy(true);
+    const res = await fetch(`/api/admin/menu/${deleting.id}`, { method: "DELETE" }).catch(() => null);
+    setBusy(false);
+    setDeleting(null);
+    if (res && res.ok) onChange();
+  };
+
+  return (
+    <>
+      <Button size="md" leadingIcon={<Icon name="plus-sign" size={20} />} onClick={openCreate}>
+        เพิ่มเมนู
+      </Button>
+
+      {items.length === 0 && (
+        <div style={{
+          padding: "48px 24px", textAlign: "center", fontFamily: "var(--font-body)",
+          fontSize: 14, color: "var(--text-tertiary)",
+        }}>ยังไม่มีเมนู</div>
+      )}
+
+      {items.map((m) => (
+        <div key={m.id} style={{
+          background: "var(--bg-primary)", borderRadius: 20, boxShadow: "var(--shadow-card)",
+          padding: 12, display: "flex", gap: 12, alignItems: "center",
+          opacity: m.active ? 1 : 0.5,
+        }}>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={m.image} alt="" style={{
+            width: 64, height: 64, borderRadius: 12, objectFit: "cover", flexShrink: 0,
+          }} />
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap" }}>
+              <span style={{ fontFamily: "var(--font-heading)", fontWeight: 700, fontSize: 15, color: "var(--text-primary)" }}>
+                {m.name}
+              </span>
+              {m.rec && <Chip size="sm" color="primary">แนะนำ</Chip>}
+              {!m.active && <Chip size="sm" color="gray">ซ่อนอยู่</Chip>}
+            </div>
+            <div style={{
+              fontFamily: "var(--font-body)", fontSize: 12, color: "var(--text-quaternary)",
+              overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
+            }}>
+              {CAT_LABEL[m.cat]} · {baht(m.price)}{m.milk ? " · มีนมโอ๊ต" : ""}
+            </div>
+          </div>
+          <Toggle checked={m.active} onChange={(v) => toggleActive(m, v)} />
+          <IconButtonCircle type="ghost" size="sm" aria-label={"แก้ไข " + m.name} onClick={() => openEdit(m)}>
+            <Icon name="edit-02" size={18} />
+          </IconButtonCircle>
+          <IconButtonCircle
+            type="ghost" size="sm" aria-label={"ลบ " + m.name} onClick={() => setDeleting(m)}
+            style={{ color: "var(--error-600)" }}
+          >
+            <Icon name="delete-02" size={18} />
+          </IconButtonCircle>
+        </div>
+      ))}
+
+      {formOpen && (
+        <MenuFormSheet
+          initial={editingItem}
+          onClose={() => setFormOpen(false)}
+          onSaved={onChange}
+        />
+      )}
+
+      {deleting && (
+        <Dialog
+          onClose={() => setDeleting(null)}
+          title={`ลบ "${deleting.name}"?`}
+          actions={
+            <>
+              <Button variant="outlined" fullWidth onClick={() => setDeleting(null)}>ยกเลิก</Button>
+              <Button fullWidth onClick={remove} disabled={busy}>{busy ? "กำลังลบ..." : "ลบเมนู"}</Button>
+            </>
+          }
+        >
+          ลบแล้วจะไม่สามารถกู้คืนได้
+        </Dialog>
+      )}
+    </>
+  );
+}
+
+function MenuFormSheet({ initial, onClose, onSaved }: {
+  initial: MenuItem | null; onClose: () => void; onSaved: () => void;
+}) {
+  const [name, setName] = React.useState(initial?.name ?? "");
+  const [desc, setDesc] = React.useState(initial?.desc ?? "");
+  const [price, setPrice] = React.useState(initial ? String(initial.price) : "");
+  const [cat, setCat] = React.useState<MenuItem["cat"]>(initial?.cat ?? "matcha");
+  const [milk, setMilk] = React.useState(initial?.milk ?? false);
+  const [rec, setRec] = React.useState(initial?.rec ?? false);
+  const [file, setFile] = React.useState<File | null>(null);
+  const [preview, setPreview] = React.useState(initial?.image ?? "");
+  const [busy, setBusy] = React.useState(false);
+  const [err, setErr] = React.useState("");
+
+  const pickFile = (f: File | null) => {
+    setFile(f);
+    if (f) setPreview(URL.createObjectURL(f));
+  };
+
+  const submit = async () => {
+    if (busy) return;
+    const priceNum = Number(price);
+    if (!name.trim() || !Number.isInteger(priceNum) || priceNum < 0) {
+      setErr("กรอกชื่อและราคาให้ถูกต้อง");
+      return;
+    }
+    setBusy(true);
+    setErr("");
+    const fd = new FormData();
+    fd.set("name", name.trim());
+    fd.set("desc", desc.trim());
+    fd.set("price", String(priceNum));
+    fd.set("cat", cat);
+    fd.set("milk", milk ? "1" : "0");
+    fd.set("rec", rec ? "1" : "0");
+    if (file) fd.set("image", file);
+    const res = await fetch(initial ? `/api/admin/menu/${initial.id}` : "/api/admin/menu", {
+      method: initial ? "PATCH" : "POST",
+      body: fd,
+    }).catch(() => null);
+    setBusy(false);
+    if (res && res.ok) { onSaved(); onClose(); return; }
+    setErr("บันทึกไม่สำเร็จ ลองใหม่อีกครั้ง");
+  };
+
+  return (
+    <div style={{ position: "fixed", inset: 0, zIndex: 50 }}>
+      <div onClick={onClose} style={{ position: "absolute", inset: 0, background: "rgba(16,24,40,0.55)" }} />
+      <div style={{
+        position: "absolute", left: 0, right: 0, bottom: 0, margin: "0 auto", maxWidth: 430,
+        maxHeight: "92vh", background: "var(--bg-primary)", borderRadius: "28px 28px 0 0",
+        overflowY: "auto", display: "flex", flexDirection: "column", gap: 16, padding: "20px 16px 24px",
+      }}>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+          <span style={{ fontFamily: "var(--font-heading)", fontWeight: 700, fontSize: 18, color: "var(--text-primary)" }}>
+            {initial ? "แก้ไขเมนู" : "เพิ่มเมนูใหม่"}
+          </span>
+          <IconButtonCircle type="ghost" size="sm" aria-label="ปิด" onClick={onClose}>
+            <Icon name="cancel-01" size={20} />
+          </IconButtonCircle>
+        </div>
+
+        <label style={{ alignSelf: "center", cursor: "pointer" }}>
+          <input
+            type="file" accept="image/*" style={{ display: "none" }}
+            onChange={(e) => pickFile(e.target.files?.[0] || null)}
+          />
+          {preview ? (
+            /* eslint-disable-next-line @next/next/no-img-element */
+            <img src={preview} alt="" style={{ width: 120, height: 120, borderRadius: 16, objectFit: "cover", display: "block" }} />
+          ) : (
+            <div style={{
+              width: 120, height: 120, borderRadius: 16, background: "var(--bg-secondary)",
+              display: "flex", alignItems: "center", justifyContent: "center", color: "var(--fg-quaternary)",
+            }}>
+              <Icon name="image-01" size={28} />
+            </div>
+          )}
+        </label>
+
+        <TextField label="ชื่อเมนู" value={name} onChange={(e) => setName(e.target.value)} />
+        <Textarea label="รายละเอียด" rows={3} value={desc} onChange={(e) => setDesc(e.target.value)} />
+        <TextField
+          label="ราคา (บาท)" inputMode="numeric" value={price}
+          onChange={(e) => setPrice(e.target.value.replace(/\D/g, ""))}
+        />
+
+        <div>
+          <div style={{ fontFamily: "var(--font-body)", fontSize: 14, color: "var(--text-secondary)", marginBottom: 8 }}>
+            หมวดหมู่
+          </div>
+          <div style={{ display: "flex", gap: 8 }}>
+            {CATS.filter((c) => c.id !== "rec").map((c) => {
+              const sel = cat === c.id;
+              return (
+                <button
+                  key={c.id} type="button" onClick={() => setCat(c.id as MenuItem["cat"])}
+                  style={{
+                    height: 40, padding: "0 16px", borderRadius: 14, border: "none", cursor: "pointer",
+                    background: sel ? "var(--brand-200)" : "var(--bg-secondary)",
+                    fontFamily: "var(--font-heading)", fontWeight: 700, fontSize: 14,
+                    color: sel ? "var(--brand-800)" : "var(--text-secondary)",
+                  }}
+                >{c.label}</button>
+              );
+            })}
+          </div>
+        </div>
+
+        <Checkbox checked={milk} onChange={() => setMilk((v) => !v)} label="มีตัวเลือกนมโอ๊ต" />
+        <Checkbox checked={rec} onChange={() => setRec((v) => !v)} label="แสดงในเมนูแนะนำ" />
+
+        {err && (
+          <div style={{ fontFamily: "var(--font-body)", fontSize: 13, color: "var(--error-600)" }}>{err}</div>
+        )}
+
+        <Button size="md" fullWidth onClick={submit} disabled={busy}>
+          {busy ? "กำลังบันทึก..." : "บันทึก"}
+        </Button>
+      </div>
     </div>
   );
 }

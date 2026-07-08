@@ -4,6 +4,7 @@ import { getDb, getSetting } from "@/lib/db";
 import { uploadFile } from "@/lib/storage";
 import { isAdmin } from "@/lib/auth";
 import { createOrder, validateContact, validateItems } from "@/lib/orders";
+import { listMenuItems } from "@/lib/menu";
 import { withinShopHours } from "@/lib/format";
 
 const MAX_UPLOAD = 10 * 1024 * 1024;
@@ -28,7 +29,8 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "bad request" }, { status: 400 });
   }
 
-  const items = validateItems(parsed.items);
+  const menuItems = await listMenuItems();
+  const items = validateItems(parsed.items, menuItems);
   const contact = validateContact(parsed.contact);
   if (!items || !contact) {
     return NextResponse.json({ error: "ข้อมูลออเดอร์ไม่ถูกต้อง" }, { status: 400 });

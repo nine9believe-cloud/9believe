@@ -6,18 +6,17 @@ import { Icon } from "@/components/Icon";
 import { TextField } from "@/components/ds";
 import { BackBar, CartPill, EmptyState, ProductCard } from "@/components/shared";
 import { CatChips } from "@/components/CatChips";
-import { MENU } from "@/lib/data";
 import { useApp } from "@/components/app-context";
 
 /* ค้นหาเมนู — search field (no label) + category chips + result list */
 
 export default function MenuPage() {
   const router = useRouter();
-  const { shop } = useApp();
+  const { shop, menuItems } = useApp();
   const [q, setQ] = React.useState("");
   const [cat, setCat] = React.useState("rec");
   const closed = !shop.open;
-  const items = MENU.filter(
+  const items = menuItems.filter(
     (m) =>
       (cat === "rec" || m.cat === cat) &&
       (!q.trim() || (m.name + m.desc).includes(q.trim()))

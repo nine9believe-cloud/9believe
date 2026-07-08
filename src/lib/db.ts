@@ -54,6 +54,18 @@ async function ensureSchema(): Promise<void> {
       key TEXT PRIMARY KEY,
       value TEXT NOT NULL
     );
+    CREATE TABLE IF NOT EXISTS menu_items (
+      id TEXT PRIMARY KEY,
+      name TEXT NOT NULL,
+      description TEXT NOT NULL DEFAULT '',
+      price INTEGER NOT NULL DEFAULT 0,
+      cat TEXT NOT NULL DEFAULT 'matcha',
+      milk BOOLEAN NOT NULL DEFAULT false,
+      rec BOOLEAN NOT NULL DEFAULT false,
+      image_url TEXT,
+      sort INTEGER NOT NULL DEFAULT 0,
+      active BOOLEAN NOT NULL DEFAULT true
+    );
   `);
 }
 

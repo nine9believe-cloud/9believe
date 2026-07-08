@@ -3,7 +3,7 @@
 import React from "react";
 import { Icon } from "./Icon";
 import { BottomFixedButton, Checkbox, Textarea } from "./ds";
-import { MENU, OAT_EXTRA, SWEETS } from "@/lib/data";
+import { OAT_EXTRA, SWEETS } from "@/lib/data";
 import { baht } from "@/lib/format";
 import { useApp } from "./app-context";
 import { OptionRow, ProductImage, QtyStepper } from "./shared";
@@ -18,8 +18,8 @@ export function DetailSheet() {
 }
 
 function SheetInner({ id, onClose, closed }: { id: string; onClose: () => void; closed: boolean }) {
-  const { addToCart } = useApp();
-  const item = MENU.find((m) => m.id === id) || MENU[0];
+  const { addToCart, menuItems } = useApp();
+  const item = menuItems.find((m) => m.id === id) || menuItems[0];
   const [sweet, setSweet] = React.useState("หวานน้อย");
   const [oat, setOat] = React.useState(false);
   const [qty, setQty] = React.useState(1);
@@ -31,6 +31,7 @@ function SheetInner({ id, onClose, closed }: { id: string; onClose: () => void; 
     return () => clearTimeout(timer);
   }, []);
 
+  if (!item) return null;
   const unit = item.price + (oat ? OAT_EXTRA : 0);
   const close = () => { setShown(false); setTimeout(onClose, 280); };
 
@@ -72,7 +73,7 @@ function SheetInner({ id, onClose, closed }: { id: string; onClose: () => void; 
         <div style={{ flex: 1, minHeight: 0, overflowY: "auto" }}>
           {/* 1:1 image */}
           <div style={{ position: "relative", width: "100%", aspectRatio: "1 / 1" }}>
-            <ProductImage id={item.id} w="100%" h="100%" r={0} />
+            <ProductImage src={item.image} w="100%" h="100%" r={0} />
           </div>
 
           <div style={{ padding: "20px 16px 24px", display: "flex", flexDirection: "column", gap: 16 }}>

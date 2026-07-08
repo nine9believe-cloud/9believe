@@ -122,6 +122,12 @@ const PATHS: Record<string, React.ReactNode> = {
   "star-01": (
     <path d="M12 3.5l2.5 5.2 5.7.7-4.2 4 1.1 5.6-5.1-2.8-5.1 2.8 1.1-5.6-4.2-4 5.7-.7L12 3.5Z" />
   ),
+  "edit-02": (
+    <>
+      <path d="M6 18l.7-3.4L14.8 6.5a1.7 1.7 0 0 1 2.4 0l.3.3a1.7 1.7 0 0 1 0 2.4L9.4 17.3 6 18Z" />
+      <path d="M13.3 8 16 10.7" />
+    </>
+  ),
 };
 
 export function Icon({

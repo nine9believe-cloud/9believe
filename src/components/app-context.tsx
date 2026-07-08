@@ -42,6 +42,7 @@ type AppState = {
   openDetail: (id: string) => void;
   closeDetail: () => void;
   shop: ShopInfo;
+  menuItems: MenuItem[];
 };
 
 const Ctx = React.createContext<AppState | null>(null);
@@ -54,6 +55,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [toast, setToast] = React.useState<string | null>(null);
   const [detailId, setDetailId] = React.useState<string | null>(null);
   const [shop, setShop] = React.useState<ShopInfo>({ open: true, adminOpen: true });
+  const [menuItems, setMenuItems] = React.useState<MenuItem[]>([]);
 
   React.useEffect(() => {
     setCartRaw(LS.get("cart", []));
@@ -72,6 +74,15 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     load();
     const id = setInterval(load, 30000);
     return () => { alive = false; clearInterval(id); };
+  }, []);
+
+  React.useEffect(() => {
+    let alive = true;
+    fetch("/api/menu")
+      .then((r) => r.json())
+      .then((d) => { if (alive) setMenuItems(d); })
+      .catch(() => {});
+    return () => { alive = false; };
   }, []);
 
   const setCart = (c: CartLine[]) => { setCartRaw(c); LS.set("cart", c); };
@@ -96,7 +107,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     const found = cart.find((l) => l.key === key);
     const next = found
       ? cart.map((l) => (l.key === key ? { ...l, qty: l.qty + opt.qty } : l))
-      : [...cart, { key, id: item.id, name: item.name, price: item.price, ...opt }];
+      : [...cart, { key, id: item.id, name: item.name, price: item.price, image: item.image, ...opt }];
     setCart(next);
     showToast(`เพิ่ม ${item.name} ลงตะกร้าแล้ว`);
   };
@@ -106,6 +117,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       value={{
         ready, cart, setCart, addToCart, contact, setContact, orders, addOrderRef,
         toast, showToast, detailId, openDetail: setDetailId, closeDetail: () => setDetailId(null), shop,
+        menuItems,
       }}
     >
       {children}

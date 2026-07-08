@@ -1,5 +1,5 @@
 import { getDb } from "./db";
-import { CartLine, Contact, MENU, OAT_EXTRA, OrderStatus, OrderView, SWEETS } from "./data";
+import { CartLine, Contact, MenuItem, OAT_EXTRA, OrderStatus, OrderView, SWEETS } from "./data";
 import { timeStr } from "./format";
 
 /* Order persistence + validation. Prices are always recomputed
@@ -22,12 +22,12 @@ type OrderRow = {
   reviewed: boolean;
 };
 
-export function validateItems(raw: unknown): CartLine[] | null {
+export function validateItems(raw: unknown, menu: MenuItem[]): CartLine[] | null {
   if (!Array.isArray(raw) || raw.length === 0 || raw.length > 50) return null;
   const lines: CartLine[] = [];
   for (const l of raw) {
     if (typeof l !== "object" || l === null) return null;
-    const item = MENU.find((m) => m.id === (l as CartLine).id);
+    const item = menu.find((m) => m.id === (l as CartLine).id);
     if (!item) return null;
     const sweet = String((l as CartLine).sweet);
     if (!(SWEETS as readonly string[]).includes(sweet)) return null;
@@ -38,7 +38,7 @@ export function validateItems(raw: unknown): CartLine[] | null {
     const note = String((l as CartLine).note || "").slice(0, 300);
     lines.push({
       key: [item.id, sweet, oat ? 1 : 0, note].join("|"),
-      id: item.id, name: item.name, price: item.price, sweet, oat, qty, note,
+      id: item.id, name: item.name, price: item.price, image: item.image, sweet, oat, qty, note,
     });
   }
   return lines;
