@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import fs from "fs";
 import path from "path";
-import { UPLOADS_DIR, getDb, getSetting } from "@/lib/db";
+import { getDb, getSetting } from "@/lib/db";
+import { uploadFile } from "@/lib/storage";
 import { isAdmin } from "@/lib/auth";
 import { createOrder, validateContact, validateItems } from "@/lib/orders";
 import { withinShopHours } from "@/lib/format";
@@ -46,11 +46,11 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "รองรับเฉพาะรูปภาพ" }, { status: 400 });
   }
 
-  await getDb(); // ensure upload dirs + schema exist
+  await getDb(); // ensure schema exists
   const fileName = `${Date.now()}-${crypto.randomUUID().slice(0, 8)}.${ext}`;
   const rel = path.join("slips", fileName);
   const buf = Buffer.from(await slip.arrayBuffer());
-  fs.writeFileSync(path.join(UPLOADS_DIR, rel), buf);
+  await uploadFile(rel, buf, slip.type);
 
   const { id, token } = await createOrder(items, contact, rel);
   return NextResponse.json({ id, token });
