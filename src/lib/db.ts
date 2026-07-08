@@ -1,9 +1,4 @@
 import { Pool, types } from "pg";
-import fs from "fs";
-import path from "path";
-
-const DATA_DIR = path.join(process.cwd(), "data");
-export const UPLOADS_DIR = path.join(DATA_DIR, "uploads");
 
 /* BIGINT columns (created_at, reviews.id) come back from pg as strings by
    default to avoid precision loss above 2^53. Our timestamps/ids never get
@@ -30,8 +25,6 @@ function getPool(): Pool {
 }
 
 async function ensureSchema(): Promise<void> {
-  fs.mkdirSync(path.join(UPLOADS_DIR, "slips"), { recursive: true });
-  fs.mkdirSync(path.join(UPLOADS_DIR, "reviews"), { recursive: true });
   await getPool().query(`
     CREATE TABLE IF NOT EXISTS orders (
       id TEXT PRIMARY KEY,

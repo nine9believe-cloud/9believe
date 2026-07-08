@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import fs from "fs";
 import path from "path";
-import { UPLOADS_DIR, getDb } from "@/lib/db";
+import { getDb } from "@/lib/db";
+import { uploadFile } from "@/lib/storage";
 import { getOrderRow } from "@/lib/orders";
 
 const MAX_UPLOAD = 10 * 1024 * 1024;
@@ -42,7 +42,7 @@ export async function POST(req: NextRequest, ctx: { params: Promise<{ id: string
     if (!ext) return NextResponse.json({ error: "รองรับเฉพาะรูปภาพ" }, { status: 400 });
     const fileName = `${Date.now()}-${crypto.randomUUID().slice(0, 8)}.${ext}`;
     photoPath = path.join("reviews", fileName);
-    fs.writeFileSync(path.join(UPLOADS_DIR, photoPath), Buffer.from(await photo.arrayBuffer()));
+    await uploadFile(photoPath, Buffer.from(await photo.arrayBuffer()), photo.type);
   }
 
   const db = await getDb();
