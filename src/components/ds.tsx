@@ -142,7 +142,10 @@ export function IconButtonCircle({
       }}
       {...rest}
     >
-      <span style={{ display: "inline-flex", width: IBC_ICON[size], height: IBC_ICON[size] }}>{children}</span>
+      <span style={{
+        display: "inline-flex", alignItems: "center", justifyContent: "center",
+        width: IBC_ICON[size], height: IBC_ICON[size],
+      }}>{children}</span>
     </button>
   );
 }

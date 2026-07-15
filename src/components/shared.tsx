@@ -35,7 +35,8 @@ export function SectionTitle({ children }: { children: React.ReactNode }) {
 /* ---------- product card ---------- */
 
 export function ProductCard({ item, closed }: { item: MenuItem; closed: boolean }) {
-  const { openDetail } = useApp();
+  const { openDetail, cart } = useApp();
+  const count = cart.filter((l) => l.id === item.id).reduce((s, l) => s + l.qty, 0);
   return (
     <div
       onClick={() => openDetail(item.id)}
@@ -61,10 +62,14 @@ export function ProductCard({ item, closed }: { item: MenuItem; closed: boolean 
         }}>{baht(item.price)}</div>
       </div>
       <IconButtonCircle
-        type="tonal" size="sm" disabled={closed} aria-label={"เลือก " + item.name}
+        type={count > 0 ? "outline" : "tonal"} size="sm" disabled={closed} aria-label={"เลือก " + item.name}
         onClick={(e) => { e.stopPropagation(); openDetail(item.id); }}
       >
-        <Icon name="plus-sign" size={20} />
+        {count > 0 ? (
+          <span style={{ fontFamily: "var(--font-heading)", fontWeight: 700, fontSize: 16 }}>{count}</span>
+        ) : (
+          <Icon name="plus-sign" size={20} />
+        )}
       </IconButtonCircle>
     </div>
   );
@@ -226,6 +231,63 @@ export function WhiteCard({ children, style = {}, ...rest }: { children: React.R
     <div style={{
       background: "var(--bg-primary)", borderRadius: 20, boxShadow: "var(--shadow-card)", padding: 16, ...style,
     }} {...rest}>{children}</div>
+  );
+}
+
+/* ---------- swipe to delete ---------- */
+
+const SWIPE_DELETE_WIDTH = 88;
+
+export function SwipeToDelete({ onDelete, radius = 20, style = {}, children }: {
+  onDelete: () => void; radius?: number; style?: CSS; children: React.ReactNode;
+}) {
+  const [x, setX] = React.useState(0);
+  const drag = React.useRef<{ startX: number; startX0: number; dragging: boolean } | null>(null);
+
+  const onPointerDown = (e: React.PointerEvent) => {
+    drag.current = { startX: e.clientX, startX0: x, dragging: false };
+  };
+  const onPointerMove = (e: React.PointerEvent) => {
+    const d = drag.current;
+    if (!d) return;
+    const delta = e.clientX - d.startX;
+    if (!d.dragging && Math.abs(delta) > 4) d.dragging = true;
+    if (!d.dragging) return;
+    setX(Math.min(0, Math.max(-SWIPE_DELETE_WIDTH, d.startX0 + delta)));
+  };
+  const endDrag = () => {
+    const wasDragging = drag.current?.dragging;
+    drag.current = null;
+    if (wasDragging) setX((cur) => (Math.abs(cur) > SWIPE_DELETE_WIDTH / 2 ? -SWIPE_DELETE_WIDTH : 0));
+  };
+
+  return (
+    <div style={{ position: "relative", overflow: "hidden", borderRadius: radius, ...style }}>
+      <button
+        type="button" onClick={onDelete} aria-label="ลบ"
+        style={{
+          position: "absolute", top: 0, right: 0, bottom: 0, width: SWIPE_DELETE_WIDTH,
+          border: "none", cursor: "pointer", background: "var(--error-600)",
+          color: "var(--text-white)", fontFamily: "var(--font-heading)", fontWeight: 700, fontSize: 15,
+        }}
+      >
+        ลบ
+      </button>
+      <div
+        onPointerDown={onPointerDown}
+        onPointerMove={onPointerMove}
+        onPointerUp={endDrag}
+        onPointerCancel={endDrag}
+        onClickCapture={(e) => { if (x !== 0) { e.preventDefault(); e.stopPropagation(); setX(0); } }}
+        style={{
+          position: "relative", touchAction: "pan-y",
+          transform: `translateX(${x}px)`,
+          transition: drag.current?.dragging ? "none" : "transform .2s ease",
+        }}
+      >
+        {children}
+      </div>
+    </div>
   );
 }
 

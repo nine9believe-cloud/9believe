@@ -145,7 +145,7 @@ function SheetInner({ id, onClose, closed }: { id: string; onClose: () => void; 
           </div>
         </div>
         <BottomFixedButton
-          primaryLabel={closed ? "ร้านปิดอยู่ · เปิด 9:00 น." : `เพิ่มในออเดอร์ · ${baht(unit * qty)}`}
+          primaryLabel={closed ? "ร้านปิดอยู่" : `เพิ่มในออเดอร์ · ${baht(unit * qty)}`}
           primaryProps={{
             disabled: closed,
             leadingIcon: closed ? null : <Icon name="plus-sign" size={22} />,

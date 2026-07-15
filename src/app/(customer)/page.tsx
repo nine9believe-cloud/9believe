@@ -65,7 +65,7 @@ export default function HomePage() {
             fontFamily: "var(--font-body)", fontWeight: 700, fontSize: 13,
           }}>
             <span style={{ width: 8, height: 8, borderRadius: 99, background: "currentColor" }} />
-            {closed ? "ร้านปิดอยู่ตอนนี้ · ร้านเปิด 9:00–17:00" : "เปิดอยู่ · 09:00–17:00 น."}
+            {closed ? "ร้านปิดอยู่" : "ร้านเปิดอยู่ตอนนี้"}
           </span>
         </div>
       </div>

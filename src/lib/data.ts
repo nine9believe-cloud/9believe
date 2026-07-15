@@ -39,14 +39,6 @@ export const STATUS_ORDER: OrderStatus[] = ["verify", "brewing", "prepare", "del
 
 export const NOTE_CHIPS = ["ไม่ต้องกดกริ่ง", "วางหน้าบ้าน", "โทรก่อนส่ง"];
 
-/* Opening hours (Bangkok time). Overridable via env so the owner can
-   change hours without touching code; the on-screen copy stays 9:00–17:00
-   per the approved design unless the code is updated together. */
-export const SHOP_HOURS = {
-  openHour: Number(process.env.SHOP_OPEN_HOUR ?? 9),
-  closeHour: Number(process.env.SHOP_CLOSE_HOUR ?? 23),
-};
-
 /* ---- Cart / order line ---- */
 
 export type CartLine = {

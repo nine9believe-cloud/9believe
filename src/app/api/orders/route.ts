@@ -5,7 +5,6 @@ import { uploadFile } from "@/lib/storage";
 import { isAdmin } from "@/lib/auth";
 import { createOrder, validateContact, validateItems } from "@/lib/orders";
 import { listMenuItems } from "@/lib/menu";
-import { withinShopHours } from "@/lib/format";
 
 const MAX_UPLOAD = 10 * 1024 * 1024;
 const IMAGE_EXT: Record<string, string> = {
@@ -14,9 +13,9 @@ const IMAGE_EXT: Record<string, string> = {
 
 /* POST — customer places an order (multipart: order JSON + slip image) */
 export async function POST(req: NextRequest) {
-  const open = (await getSetting("shop_open", "1")) === "1" && withinShopHours();
+  const open = (await getSetting("shop_open", "1")) === "1";
   if (!open) {
-    return NextResponse.json({ error: "ร้านปิดอยู่ตอนนี้ · ร้านเปิด 9:00–17:00" }, { status: 409 });
+    return NextResponse.json({ error: "ร้านปิดอยู่ตอนนี้" }, { status: 409 });
   }
 
   const fd = await req.formData().catch(() => null);

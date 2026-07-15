@@ -202,13 +202,8 @@ function Dashboard({ onLogout }: { onLogout: () => void }) {
         }}>
           <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
             <Icon name="store-01" size={22} style={{ color: adminOpen ? "var(--success-600)" : "var(--error-600)" }} />
-            <div>
-              <div style={{ fontFamily: "var(--font-heading)", fontWeight: 700, fontSize: 15, color: "var(--text-primary)" }}>
-                {adminOpen ? "ร้านเปิดอยู่" : "ร้านปิดชั่วคราว"}
-              </div>
-              <div style={{ fontFamily: "var(--font-body)", fontSize: 12, color: "var(--text-quaternary)" }}>
-                เวลาทำการ 09:00–17:00 น.
-              </div>
+            <div style={{ fontFamily: "var(--font-heading)", fontWeight: 700, fontSize: 15, color: "var(--text-primary)" }}>
+              {adminOpen ? "ร้านเปิดอยู่" : "ร้านปิดชั่วคราว"}
             </div>
           </div>
           <Toggle checked={adminOpen} onChange={toggleShop} />

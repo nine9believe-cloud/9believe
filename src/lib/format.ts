@@ -1,4 +1,4 @@
-import { CartLine, OAT_EXTRA, SHOP_HOURS } from "./data";
+import { CartLine, OAT_EXTRA } from "./data";
 
 export const baht = (n: number) => "฿" + n.toLocaleString("th-TH");
 
@@ -19,11 +19,6 @@ export const timeStr = (d: Date) =>
 
 export const bangkokHour = (d = new Date()) =>
   Number(new Intl.DateTimeFormat("en-GB", { hour: "numeric", hour12: false, timeZone: BKK }).format(d));
-
-export const withinShopHours = (d = new Date()) => {
-  const h = bangkokHour(d);
-  return h >= SHOP_HOURS.openHour && h < SHOP_HOURS.closeHour;
-};
 
 export const greeting = () => {
   const h = bangkokHour();
