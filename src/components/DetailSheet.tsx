@@ -134,7 +134,7 @@ function SheetInner({ id, onClose, closed }: { id: string; onClose: () => void; 
 
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
               {label("จำนวน")}
-              <QtyStepper qty={qty} onChange={setQty} />
+              <QtyStepper qty={qty} onChange={setQty} min={0} />
             </div>
 
             <Textarea
@@ -145,12 +145,18 @@ function SheetInner({ id, onClose, closed }: { id: string; onClose: () => void; 
           </div>
         </div>
         <BottomFixedButton
-          primaryLabel={closed ? "ร้านปิดอยู่" : `เพิ่มในออเดอร์ · ${baht(unit * qty)}`}
+          primaryLabel={
+            qty === 0 ? "กลับไปหน้าหลัก" : closed ? "ร้านปิดอยู่" : `เพิ่มในออเดอร์ · ${baht(unit * qty)}`
+          }
           primaryProps={{
-            disabled: closed,
-            leadingIcon: closed ? null : <Icon name="plus-sign" size={22} />,
+            disabled: qty === 0 ? false : closed,
+            leadingIcon: qty === 0 || closed ? null : <Icon name="plus-sign" size={22} />,
           }}
-          onPrimary={() => { addToCart(item, { sweet, oat, qty, note }); close(); }}
+          onPrimary={() => {
+            if (qty === 0) { close(); return; }
+            addToCart(item, { sweet, oat, qty, note });
+            close();
+          }}
         />
       </div>
     </div>

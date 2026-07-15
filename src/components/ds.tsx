@@ -461,7 +461,8 @@ export function TopAppBar({
 }) {
   return (
     <div style={{
-      display: "flex", alignItems: "center", gap: 8, height: 44, padding: "8px 16px",
+      display: "flex", alignItems: "center", gap: 8, minHeight: 44,
+      padding: "calc(env(safe-area-inset-top, 0px) + 8px) 16px 8px",
       background: "var(--bg-primary)", boxSizing: "border-box", ...style,
     }}>
       <div style={{ width: 40, display: "flex", justifyContent: "flex-start" }}>{leading}</div>

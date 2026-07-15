@@ -200,7 +200,7 @@ export function BackBar({ title, onBack, trailing }: { title: string; onBack: ()
   return (
     <TopAppBar
       title={title}
-      style={{ background: "transparent", flexShrink: 0 }}
+      style={{ background: "var(--bg-secondary)", flexShrink: 0, position: "sticky", top: 0, zIndex: 20 }}
       leading={
         <IconButtonCircle type="ghost" size="sm" aria-label="ย้อนกลับ" onClick={onBack}>
           <Icon name="arrow-left-01" size={24} />
@@ -399,7 +399,7 @@ export function Toast() {
   if (!toast) return null;
   return (
     <div style={{
-      position: "fixed", left: 0, right: 0, top: 24, zIndex: 60,
+      position: "fixed", left: 0, right: 0, top: "calc(env(safe-area-inset-top, 0px) + 24px)", zIndex: 60,
       display: "flex", justifyContent: "center", pointerEvents: "none",
     }}>
       <div style={{
