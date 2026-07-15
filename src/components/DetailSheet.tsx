@@ -18,7 +18,7 @@ export function DetailSheet() {
 }
 
 function SheetInner({ id, onClose, closed }: { id: string; onClose: () => void; closed: boolean }) {
-  const { addToCart, menuItems } = useApp();
+  const { addToCart, menuItems, cart, setCart } = useApp();
   const item = menuItems.find((m) => m.id === id) || menuItems[0];
   const [sweet, setSweet] = React.useState("หวานน้อย");
   const [oat, setOat] = React.useState(false);
@@ -153,7 +153,11 @@ function SheetInner({ id, onClose, closed }: { id: string; onClose: () => void; 
             leadingIcon: qty === 0 || closed ? null : <Icon name="plus-sign" size={22} />,
           }}
           onPrimary={() => {
-            if (qty === 0) { close(); return; }
+            if (qty === 0) {
+              setCart(cart.filter((l) => l.id !== item.id));
+              close();
+              return;
+            }
             addToCart(item, { sweet, oat, qty, note });
             close();
           }}
