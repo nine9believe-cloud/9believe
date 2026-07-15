@@ -14,7 +14,7 @@ import { useApp } from "@/components/app-context";
 export default function CheckoutPage() {
   const router = useRouter();
   const { ready, cart, setContact } = useApp();
-  const [f, setF] = React.useState({ name: "", phone: "", house: "", chips: [] as string[], extra: "" });
+  const [f, setF] = React.useState({ name: "", phone: "", soi: "", house: "", chips: [] as string[], extra: "" });
   const [phoneTouched, setPhoneTouched] = React.useState(false);
 
   React.useEffect(() => {
@@ -22,13 +22,12 @@ export default function CheckoutPage() {
   }, [ready, cart.length, router]);
 
   const errs = {
-    name: !f.name.trim(),
-    phone: !/^0\d{8,9}$/.test(f.phone.replace(/[- ]/g, "")),
+    phone: f.phone.trim().length > 0 && !/^0\d{8,9}$/.test(f.phone.replace(/[- ]/g, "")),
     house: !f.house.trim(),
   };
-  const invalid = errs.name || errs.phone || errs.house;
+  const invalid = errs.phone || errs.house;
 
-  const set = (k: "name" | "house" | "extra") =>
+  const set = (k: "name" | "soi" | "house" | "extra") =>
     (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => setF({ ...f, [k]: e.target.value });
   const setPhone = (e: React.ChangeEvent<HTMLInputElement>) =>
     setF({ ...f, phone: e.target.value.replace(/\D/g, "").slice(0, 10) });
@@ -49,15 +48,16 @@ export default function CheckoutPage() {
         display: "flex", flexDirection: "column", gap: 16,
       }}>
         <SectionTitle>ข้อมูลจัดส่ง</SectionTitle>
-        <TextField label="ชื่อผู้รับ" required value={f.name} onChange={set("name")} />
+        <TextField label="ชื่อผู้รับ" value={f.name} onChange={set("name")} />
         <div onBlur={() => setPhoneTouched(true)}>
           <TextField
-            label="เบอร์โทร" required type="tel" inputMode="numeric" maxLength={10}
+            label="เบอร์โทร" type="tel" inputMode="numeric" maxLength={10}
             value={f.phone} onChange={setPhone}
             error={phoneTouched && f.phone.length > 0 && errs.phone}
             helpText={phoneTouched && f.phone.length > 0 && errs.phone ? "เบอร์โทร 9–10 หลัก ขึ้นต้นด้วย 0" : ""}
           />
         </div>
+        <TextField label="ซอย" value={f.soi} onChange={set("soi")} />
         <TextField label="บ้านเลขที่" required value={f.house} onChange={set("house")} placeholder="เช่น 54/447" />
 
         <Textarea

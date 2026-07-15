@@ -1,12 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { isAdmin } from "@/lib/auth";
+import { categoryExists } from "@/lib/categories";
 import { deleteMenuItem, MenuImageInput, MenuItemInput, updateMenuItem } from "@/lib/menu";
 
 const MAX_UPLOAD = 10 * 1024 * 1024;
 const IMAGE_EXT: Record<string, string> = {
   "image/jpeg": "jpg", "image/png": "png", "image/webp": "webp", "image/heic": "heic",
 };
-const CATS = ["matcha", "thai", "milk"];
 
 function parseFields(fd: FormData): MenuItemInput | null {
   const name = String(fd.get("name") || "").trim().slice(0, 120);
@@ -15,7 +15,7 @@ function parseFields(fd: FormData): MenuItemInput | null {
   const cat = String(fd.get("cat") || "");
   const milk = fd.get("milk") === "1";
   const rec = fd.get("rec") === "1";
-  if (!name || !Number.isInteger(price) || price < 0 || price > 100000 || !CATS.includes(cat)) {
+  if (!name || !Number.isInteger(price) || price < 0 || price > 100000 || !cat) {
     return null;
   }
   return { name, desc, price, cat, milk, rec };
@@ -41,6 +41,9 @@ export async function PATCH(req: NextRequest, ctx: { params: Promise<{ id: strin
 
   const data = parseFields(fd);
   if (!data) return NextResponse.json({ error: "ข้อมูลไม่ถูกต้อง" }, { status: 400 });
+  if (!(await categoryExists(data.cat))) {
+    return NextResponse.json({ error: "หมวดหมู่ไม่ถูกต้อง" }, { status: 400 });
+  }
 
   const image = await parseImage(fd);
   if (image === null) return NextResponse.json({ error: "รูปภาพไม่ถูกต้อง (สูงสุด 10MB)" }, { status: 400 });

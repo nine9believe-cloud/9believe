@@ -6,7 +6,7 @@ import {
   BottomFixedButton, Button, Checkbox, Chip, Dialog, Divider,
   IconButtonCircle, TextField, Textarea, Toggle,
 } from "@/components/ds";
-import { CartLine, CAT_LABEL, CATS, MenuItem, OrderStatus, STATUS_ORDER, STEPS } from "@/lib/data";
+import { CartLine, Category, MenuItem, OrderStatus, STATUS_ORDER, STEPS } from "@/lib/data";
 import { AdminMenuItem } from "@/lib/menu";
 import { baht, optionText, lineUnit } from "@/lib/format";
 
@@ -17,7 +17,7 @@ type AdminOrder = {
   createdAt: number;
   items: CartLine[];
   total: number;
-  contact: { name: string; phone: string; house: string; chips: string[]; extra: string };
+  contact: { name: string; phone: string; soi: string; house: string; chips: string[]; extra: string };
   status: OrderStatus;
   times: Partial<Record<OrderStatus, string>>;
   slipUrl: string | null;
@@ -118,11 +118,12 @@ function Login({ onOk }: { onOk: () => void }) {
 /* ---------- dashboard ---------- */
 
 function Dashboard({ onLogout }: { onLogout: () => void }) {
-  const [tab, setTab] = React.useState<"orders" | "reviews" | "menu">("orders");
+  const [tab, setTab] = React.useState<"orders" | "reviews" | "menu" | "categories">("orders");
   const [adminOpen, setAdminOpen] = React.useState(true);
   const [orders, setOrders] = React.useState<AdminOrder[]>([]);
   const [reviews, setReviews] = React.useState<Review[]>([]);
   const [menuItems, setMenuItems] = React.useState<AdminMenuItem[]>([]);
+  const [categories, setCategories] = React.useState<Category[]>([]);
   const [openId, setOpenId] = React.useState<string | null>(null);
 
   const load = React.useCallback(() => {
@@ -130,6 +131,7 @@ function Dashboard({ onLogout }: { onLogout: () => void }) {
     fetch("/api/orders").then((r) => (r.ok ? r.json() : [])).then(setOrders).catch(() => {});
     fetch("/api/admin/reviews").then((r) => (r.ok ? r.json() : [])).then(setReviews).catch(() => {});
     fetch("/api/admin/menu").then((r) => (r.ok ? r.json() : [])).then(setMenuItems).catch(() => {});
+    fetch("/api/admin/categories").then((r) => (r.ok ? r.json() : [])).then(setCategories).catch(() => {});
   }, []);
 
   React.useEffect(() => {
@@ -217,6 +219,7 @@ function Dashboard({ onLogout }: { onLogout: () => void }) {
             ["orders", `ออเดอร์ (${active.length})`],
             ["reviews", `รีวิว (${reviews.length})`],
             ["menu", `เมนู (${menuItems.length})`],
+            ["categories", `หมวดหมู่ (${categories.length})`],
           ] as const).map(([id, label]) => {
             const sel = tab === id;
             return (
@@ -250,7 +253,9 @@ function Dashboard({ onLogout }: { onLogout: () => void }) {
             ))}
           </>
         ) : tab === "menu" ? (
-          <MenuTab items={menuItems} onChange={load} />
+          <MenuTab items={menuItems} categories={categories} onChange={load} />
+        ) : tab === "categories" ? (
+          <CategoryTab categories={categories} onChange={load} />
         ) : (
           <>
             {reviews.length === 0 && (
@@ -360,7 +365,10 @@ function OrderCard({ o, open, onToggle, onAdvance }: {
           }}>
             <Icon name="location-01" size={16} style={{ marginTop: 2 }} />
             <span>
-              บ้านเลขที่ {o.contact.house} · {o.contact.name} · {o.contact.phone}
+              {o.contact.soi && <>ซอย {o.contact.soi} · </>}
+              บ้านเลขที่ {o.contact.house}
+              {o.contact.name && <> · {o.contact.name}</>}
+              {o.contact.phone && <> · {o.contact.phone}</>}
               {o.contact.chips.length > 0 && <> · {o.contact.chips.join(" · ")}</>}
               {o.contact.extra && <> · “{o.contact.extra}”</>}
             </span>
@@ -388,7 +396,9 @@ function OrderCard({ o, open, onToggle, onAdvance }: {
 
 /* ---------- menu management (master list CRUD) ---------- */
 
-function MenuTab({ items, onChange }: { items: AdminMenuItem[]; onChange: () => void }) {
+function MenuTab({ items, categories, onChange }: {
+  items: AdminMenuItem[]; categories: Category[]; onChange: () => void;
+}) {
   const [formOpen, setFormOpen] = React.useState(false);
   const [editingItem, setEditingItem] = React.useState<AdminMenuItem | null>(null);
   const [deleting, setDeleting] = React.useState<AdminMenuItem | null>(null);
@@ -450,7 +460,7 @@ function MenuTab({ items, onChange }: { items: AdminMenuItem[]; onChange: () => 
               fontFamily: "var(--font-body)", fontSize: 12, color: "var(--text-quaternary)",
               overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
             }}>
-              {CAT_LABEL[m.cat]} · {baht(m.price)}{m.milk ? " · มีนมโอ๊ต" : ""}
+              {categories.find((c) => c.id === m.cat)?.label ?? m.cat} · {baht(m.price)}{m.milk ? " · มีนมโอ๊ต" : ""}
             </div>
           </div>
           <Toggle checked={m.active} onChange={(v) => toggleActive(m, v)} />
@@ -469,6 +479,7 @@ function MenuTab({ items, onChange }: { items: AdminMenuItem[]; onChange: () => 
       {formOpen && (
         <MenuFormSheet
           initial={editingItem}
+          categories={categories}
           onClose={() => setFormOpen(false)}
           onSaved={onChange}
         />
@@ -492,13 +503,13 @@ function MenuTab({ items, onChange }: { items: AdminMenuItem[]; onChange: () => 
   );
 }
 
-function MenuFormSheet({ initial, onClose, onSaved }: {
-  initial: MenuItem | null; onClose: () => void; onSaved: () => void;
+function MenuFormSheet({ initial, categories, onClose, onSaved }: {
+  initial: MenuItem | null; categories: Category[]; onClose: () => void; onSaved: () => void;
 }) {
   const [name, setName] = React.useState(initial?.name ?? "");
   const [desc, setDesc] = React.useState(initial?.desc ?? "");
   const [price, setPrice] = React.useState(initial ? String(initial.price) : "");
-  const [cat, setCat] = React.useState<MenuItem["cat"]>(initial?.cat ?? "matcha");
+  const [cat, setCat] = React.useState(initial?.cat ?? categories[0]?.id ?? "");
   const [milk, setMilk] = React.useState(initial?.milk ?? false);
   const [rec, setRec] = React.useState(initial?.rec ?? false);
   const [file, setFile] = React.useState<File | null>(null);
@@ -514,8 +525,8 @@ function MenuFormSheet({ initial, onClose, onSaved }: {
   const submit = async () => {
     if (busy) return;
     const priceNum = Number(price);
-    if (!name.trim() || !Number.isInteger(priceNum) || priceNum < 0) {
-      setErr("กรอกชื่อและราคาให้ถูกต้อง");
+    if (!name.trim() || !Number.isInteger(priceNum) || priceNum < 0 || !cat) {
+      setErr("กรอกชื่อ ราคา และเลือกหมวดหมู่ให้ถูกต้อง");
       return;
     }
     setBusy(true);
@@ -583,22 +594,28 @@ function MenuFormSheet({ initial, onClose, onSaved }: {
           <div style={{ fontFamily: "var(--font-body)", fontSize: 14, color: "var(--text-secondary)", marginBottom: 8 }}>
             หมวดหมู่
           </div>
-          <div style={{ display: "flex", gap: 8 }}>
-            {CATS.filter((c) => c.id !== "rec").map((c) => {
-              const sel = cat === c.id;
-              return (
-                <button
-                  key={c.id} type="button" onClick={() => setCat(c.id as MenuItem["cat"])}
-                  style={{
-                    height: 40, padding: "0 16px", borderRadius: 14, border: "none", cursor: "pointer",
-                    background: sel ? "var(--brand-200)" : "var(--bg-secondary)",
-                    fontFamily: "var(--font-heading)", fontWeight: 700, fontSize: 14,
-                    color: sel ? "var(--brand-800)" : "var(--text-secondary)",
-                  }}
-                >{c.label}</button>
-              );
-            })}
-          </div>
+          {categories.length === 0 ? (
+            <div style={{ fontFamily: "var(--font-body)", fontSize: 13, color: "var(--text-tertiary)" }}>
+              ยังไม่มีหมวดหมู่ — เพิ่มหมวดหมู่ก่อนในแท็บ &quot;หมวดหมู่&quot;
+            </div>
+          ) : (
+            <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+              {categories.map((c) => {
+                const sel = cat === c.id;
+                return (
+                  <button
+                    key={c.id} type="button" onClick={() => setCat(c.id)}
+                    style={{
+                      height: 40, padding: "0 16px", borderRadius: 14, border: "none", cursor: "pointer",
+                      background: sel ? "var(--brand-200)" : "var(--bg-secondary)",
+                      fontFamily: "var(--font-heading)", fontWeight: 700, fontSize: 14,
+                      color: sel ? "var(--brand-800)" : "var(--text-secondary)",
+                    }}
+                  >{c.label}</button>
+                );
+              })}
+            </div>
+          )}
         </div>
 
         <Checkbox checked={milk} onChange={() => setMilk((v) => !v)} label="มีตัวเลือกนมโอ๊ต" />
@@ -613,5 +630,190 @@ function MenuFormSheet({ initial, onClose, onSaved }: {
         </Button>
       </div>
     </div>
+  );
+}
+
+/* ---------- category management (CRUD) ---------- */
+
+function CategoryTab({ categories, onChange }: { categories: Category[]; onChange: () => void }) {
+  const [adding, setAdding] = React.useState(false);
+  const [newLabel, setNewLabel] = React.useState("");
+  const [editingId, setEditingId] = React.useState<string | null>(null);
+  const [editLabel, setEditLabel] = React.useState("");
+  const [deleting, setDeleting] = React.useState<Category | null>(null);
+  const [busy, setBusy] = React.useState(false);
+  const [err, setErr] = React.useState("");
+
+  const submitAdd = async () => {
+    const label = newLabel.trim();
+    if (!label || busy) return;
+    setBusy(true);
+    setErr("");
+    const res = await fetch("/api/admin/categories", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ label }),
+    }).catch(() => null);
+    setBusy(false);
+    if (res && res.ok) {
+      setNewLabel("");
+      setAdding(false);
+      onChange();
+    } else {
+      setErr("เพิ่มหมวดหมู่ไม่สำเร็จ");
+    }
+  };
+
+  const startEdit = (c: Category) => { setEditingId(c.id); setEditLabel(c.label); setErr(""); };
+
+  const submitEdit = async () => {
+    const label = editLabel.trim();
+    if (!editingId || !label || busy) return;
+    setBusy(true);
+    setErr("");
+    const res = await fetch(`/api/admin/categories/${editingId}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ label }),
+    }).catch(() => null);
+    setBusy(false);
+    if (res && res.ok) {
+      setEditingId(null);
+      onChange();
+    } else {
+      setErr("แก้ไขหมวดหมู่ไม่สำเร็จ");
+    }
+  };
+
+  const move = async (idx: number, dir: -1 | 1) => {
+    const j = idx + dir;
+    if (j < 0 || j >= categories.length) return;
+    const order = categories.map((c) => c.id);
+    [order[idx], order[j]] = [order[j], order[idx]];
+    await fetch("/api/admin/categories", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ order }),
+    }).catch(() => null);
+    onChange();
+  };
+
+  const remove = async () => {
+    if (!deleting || busy) return;
+    setBusy(true);
+    setErr("");
+    const res = await fetch(`/api/admin/categories/${deleting.id}`, { method: "DELETE" }).catch(() => null);
+    setBusy(false);
+    setDeleting(null);
+    if (res && res.ok) {
+      onChange();
+      return;
+    }
+    const body = await res?.json().catch(() => null);
+    setErr(body?.error || "ลบหมวดหมู่ไม่สำเร็จ");
+  };
+
+  return (
+    <>
+      {!adding ? (
+        <Button size="md" leadingIcon={<Icon name="plus-sign" size={20} />} onClick={() => setAdding(true)}>
+          เพิ่มหมวดหมู่
+        </Button>
+      ) : (
+        <div style={{ display: "flex", gap: 8, alignItems: "flex-end" }}>
+          <div style={{ flex: 1 }}>
+            <TextField
+              label="ชื่อหมวดหมู่" value={newLabel} onChange={(e) => setNewLabel(e.target.value)}
+              onKeyDown={(e) => { if (e.key === "Enter") submitAdd(); }} autoFocus
+            />
+          </div>
+          <Button size="md" onClick={submitAdd} disabled={busy || !newLabel.trim()}>บันทึก</Button>
+          <Button size="md" variant="outlined" onClick={() => { setAdding(false); setNewLabel(""); }}>ยกเลิก</Button>
+        </div>
+      )}
+
+      {err && (
+        <div style={{ fontFamily: "var(--font-body)", fontSize: 13, color: "var(--error-600)" }}>{err}</div>
+      )}
+
+      {categories.length === 0 && (
+        <div style={{
+          padding: "48px 24px", textAlign: "center", fontFamily: "var(--font-body)",
+          fontSize: 14, color: "var(--text-tertiary)",
+        }}>ยังไม่มีหมวดหมู่</div>
+      )}
+
+      {categories.map((c, i) => (
+        <div key={c.id} style={{
+          background: "var(--bg-primary)", borderRadius: 20, boxShadow: "var(--shadow-card)",
+          padding: 12, display: "flex", gap: 4, alignItems: "center",
+        }}>
+          <div style={{ display: "flex", flexDirection: "column" }}>
+            <IconButtonCircle
+              type="ghost" size="xs" aria-label={"เลื่อน " + c.label + " ขึ้น"}
+              onClick={() => move(i, -1)} disabled={i === 0}
+            >
+              <Icon name="arrow-right-01" size={14} style={{ transform: "rotate(-90deg)" }} />
+            </IconButtonCircle>
+            <IconButtonCircle
+              type="ghost" size="xs" aria-label={"เลื่อน " + c.label + " ลง"}
+              onClick={() => move(i, 1)} disabled={i === categories.length - 1}
+            >
+              <Icon name="arrow-right-01" size={14} style={{ transform: "rotate(90deg)" }} />
+            </IconButtonCircle>
+          </div>
+          <div style={{ flex: 1, minWidth: 0, padding: "0 4px" }}>
+            {editingId === c.id ? (
+              <TextField
+                value={editLabel} onChange={(e) => setEditLabel(e.target.value)}
+                onKeyDown={(e) => { if (e.key === "Enter") submitEdit(); if (e.key === "Escape") setEditingId(null); }}
+                autoFocus
+              />
+            ) : (
+              <span style={{ fontFamily: "var(--font-heading)", fontWeight: 700, fontSize: 15, color: "var(--text-primary)" }}>
+                {c.label}
+              </span>
+            )}
+          </div>
+          {editingId === c.id ? (
+            <>
+              <IconButtonCircle type="ghost" size="sm" aria-label="บันทึก" onClick={submitEdit} disabled={busy}>
+                <Icon name="tick-02" size={18} />
+              </IconButtonCircle>
+              <IconButtonCircle type="ghost" size="sm" aria-label="ยกเลิก" onClick={() => setEditingId(null)}>
+                <Icon name="cancel-01" size={18} />
+              </IconButtonCircle>
+            </>
+          ) : (
+            <>
+              <IconButtonCircle type="ghost" size="sm" aria-label={"แก้ไข " + c.label} onClick={() => startEdit(c)}>
+                <Icon name="edit-02" size={18} />
+              </IconButtonCircle>
+              <IconButtonCircle
+                type="ghost" size="sm" aria-label={"ลบ " + c.label} onClick={() => setDeleting(c)}
+                style={{ color: "var(--error-600)" }}
+              >
+                <Icon name="delete-02" size={18} />
+              </IconButtonCircle>
+            </>
+          )}
+        </div>
+      ))}
+
+      {deleting && (
+        <Dialog
+          onClose={() => setDeleting(null)}
+          title={`ลบ "${deleting.label}"?`}
+          actions={
+            <>
+              <Button variant="outlined" fullWidth onClick={() => setDeleting(null)}>ยกเลิก</Button>
+              <Button fullWidth onClick={remove} disabled={busy}>{busy ? "กำลังลบ..." : "ลบหมวดหมู่"}</Button>
+            </>
+          }
+        >
+          ลบไม่ได้ถ้ายังมีเมนูอยู่ในหมวดนี้ — ย้ายเมนูออกก่อน
+        </Dialog>
+      )}
+    </>
   );
 }

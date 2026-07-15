@@ -104,7 +104,12 @@ export default function TrackPage() {
             fontFamily: "var(--font-body)", fontSize: 13, color: "var(--text-tertiary)",
           }}>
             <Icon name="location-01" size={16} />
-            <span>บ้านเลขที่ {order.contact.house} · {order.contact.name} · {order.contact.phone}</span>
+            <span>
+              {order.contact.soi && <>ซอย {order.contact.soi} · </>}
+              บ้านเลขที่ {order.contact.house}
+              {order.contact.name && <> · {order.contact.name}</>}
+              {order.contact.phone && <> · {order.contact.phone}</>}
+            </span>
           </div>
         </WhiteCard>
       </div>

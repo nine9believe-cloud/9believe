@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation";
 import { Icon } from "@/components/Icon";
 import { IconButtonCircle, Logo } from "@/components/ds";
 import { CartPill, ProductCard, SectionTitle } from "@/components/shared";
-import { CATS, CAT_LABEL } from "@/lib/data";
 import { greeting } from "@/lib/format";
 import { useApp } from "@/components/app-context";
 import { CatChips } from "@/components/CatChips";
@@ -14,7 +13,7 @@ import { CatChips } from "@/components/CatChips";
 
 export default function HomePage() {
   const router = useRouter();
-  const { shop, menuItems } = useApp();
+  const { shop, menuItems, categories } = useApp();
   const [cat, setCat] = React.useState("rec");
   const [greet, setGreet] = React.useState("สวัสดี");
   React.useEffect(() => setGreet(greeting()), []);
@@ -23,14 +22,15 @@ export default function HomePage() {
   const sections = React.useMemo(() => {
     if (cat === "rec") {
       const s = [{ title: "แนะนำ", items: menuItems.filter((m) => m.rec) }];
-      for (const c of CATS.slice(1)) {
+      for (const c of categories) {
         const items = menuItems.filter((m) => m.cat === c.id && !m.rec);
         if (items.length) s.push({ title: c.label, items });
       }
       return s;
     }
-    return [{ title: CAT_LABEL[cat], items: menuItems.filter((m) => m.cat === cat) }];
-  }, [cat, menuItems]);
+    const label = categories.find((c) => c.id === cat)?.label ?? "";
+    return [{ title: label, items: menuItems.filter((m) => m.cat === cat) }];
+  }, [cat, menuItems, categories]);
 
   return (
     <div style={{ display: "flex", flexDirection: "column", minHeight: "100%" }}>

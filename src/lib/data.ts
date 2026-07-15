@@ -4,25 +4,18 @@ export type MenuItem = {
   id: string;
   name: string;
   price: number;
-  cat: "matcha" | "thai" | "milk";
+  cat: string;
   milk: boolean;
   rec: boolean;
   desc: string;
   image: string;
 };
 
-export const CATS = [
-  { id: "rec", label: "แนะนำ" },
-  { id: "matcha", label: "มัจฉะ" },
-  { id: "thai", label: "ชาไทย" },
-  { id: "milk", label: "ชานม" },
-] as const;
-
-export const CAT_LABEL: Record<string, string> = {
-  matcha: "มัจฉะ",
-  thai: "ชาไทย",
-  milk: "ชานม",
-};
+/* Categories are admin-managed (CRUD via /admin) and DB-backed — see
+   lib/categories.ts. "rec" isn't a real category: it's a pseudo-filter
+   for items flagged `rec`, always pinned first in the chip row. */
+export type Category = { id: string; label: string };
+export const REC_FILTER: Category = { id: "rec", label: "แนะนำ" };
 
 export const SWEETS = ["ไม่หวาน", "หวานน้อย", "หวานปกติ"] as const;
 export const OAT_EXTRA = 10;
@@ -71,6 +64,7 @@ export type CartLine = {
 export type Contact = {
   name: string;
   phone: string;
+  soi: string;
   house: string;
   chips: string[];
   extra: string;

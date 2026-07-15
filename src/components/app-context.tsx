@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { CartLine, Contact, MenuItem } from "@/lib/data";
+import { CartLine, Category, Contact, MenuItem } from "@/lib/data";
 
 /* App-wide client state: cart + contact persist in localStorage
    (same behaviour as the prototype), order refs keep the access
@@ -43,6 +43,7 @@ type AppState = {
   closeDetail: () => void;
   shop: ShopInfo;
   menuItems: MenuItem[];
+  categories: Category[];
 };
 
 const Ctx = React.createContext<AppState | null>(null);
@@ -56,6 +57,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [detailId, setDetailId] = React.useState<string | null>(null);
   const [shop, setShop] = React.useState<ShopInfo>({ open: true, adminOpen: true });
   const [menuItems, setMenuItems] = React.useState<MenuItem[]>([]);
+  const [categories, setCategories] = React.useState<Category[]>([]);
 
   React.useEffect(() => {
     setCartRaw(LS.get("cart", []));
@@ -81,6 +83,15 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     fetch("/api/menu")
       .then((r) => r.json())
       .then((d) => { if (alive) setMenuItems(d); })
+      .catch(() => {});
+    return () => { alive = false; };
+  }, []);
+
+  React.useEffect(() => {
+    let alive = true;
+    fetch("/api/categories")
+      .then((r) => r.json())
+      .then((d) => { if (alive) setCategories(d); })
       .catch(() => {});
     return () => { alive = false; };
   }, []);
@@ -117,7 +128,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       value={{
         ready, cart, setCart, addToCart, contact, setContact, orders, addOrderRef,
         toast, showToast, detailId, openDetail: setDetailId, closeDetail: () => setDetailId(null), shop,
-        menuItems,
+        menuItems, categories,
       }}
     >
       {children}

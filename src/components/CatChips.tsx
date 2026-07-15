@@ -1,15 +1,18 @@
 "use client";
 
-import { CATS } from "@/lib/data";
+import { REC_FILTER } from "@/lib/data";
+import { useApp } from "./app-context";
 
 /* Category chip row (white pills, selected = warm tan) */
 export function CatChips({ active, onChange }: { active: string; onChange: (id: string) => void }) {
+  const { categories } = useApp();
+  const cats = [REC_FILTER, ...categories];
   return (
     <div style={{
       display: "flex", gap: 8, overflowX: "auto", padding: "2px 16px 6px",
       margin: "0 -16px", scrollbarWidth: "none",
     }}>
-      {CATS.map((c) => {
+      {cats.map((c) => {
         const sel = c.id === active;
         return (
           <button

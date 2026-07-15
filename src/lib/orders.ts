@@ -13,6 +13,7 @@ type OrderRow = {
   total: number;
   name: string;
   phone: string;
+  soi: string;
   house: string;
   chips: string[];
   extra: string;
@@ -49,11 +50,12 @@ export function validateContact(raw: unknown): Contact | null {
   const c = raw as Contact;
   const name = String(c.name || "").trim().slice(0, 120);
   const phone = String(c.phone || "").replace(/[- ]/g, "");
+  const soi = String(c.soi || "").trim().slice(0, 120);
   const house = String(c.house || "").trim().slice(0, 120);
-  if (!name || !house || !/^0\d{8,9}$/.test(phone)) return null;
+  if (!house || (phone && !/^0\d{8,9}$/.test(phone))) return null;
   const chips = Array.isArray(c.chips) ? c.chips.map((x) => String(x).slice(0, 60)).slice(0, 10) : [];
   const extra = String(c.extra || "").slice(0, 500);
-  return { name, phone, house, chips, extra };
+  return { name, phone, soi, house, chips, extra };
 }
 
 export const orderTotal = (items: CartLine[]) =>
@@ -75,11 +77,11 @@ export async function createOrder(items: CartLine[], contact: Contact, slipPath:
   const now = Date.now();
   const times: Partial<Record<OrderStatus, string>> = { verify: timeStr(new Date(now)) };
   await db.query(
-    `INSERT INTO orders (id, token, created_at, items, total, name, phone, house, chips, extra, status, times, slip_path)
-     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, 'verify', $11, $12)`,
+    `INSERT INTO orders (id, token, created_at, items, total, name, phone, soi, house, chips, extra, status, times, slip_path)
+     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, 'verify', $12, $13)`,
     [
       id, token, now, JSON.stringify(items), orderTotal(items),
-      contact.name, contact.phone, contact.house, JSON.stringify(contact.chips), contact.extra,
+      contact.name, contact.phone, contact.soi, contact.house, JSON.stringify(contact.chips), contact.extra,
       JSON.stringify(times), slipPath,
     ]
   );
@@ -100,7 +102,7 @@ export function rowToView(row: OrderRow): OrderView {
     items: row.items,
     total: row.total,
     contact: {
-      name: row.name, phone: row.phone, house: row.house,
+      name: row.name, phone: row.phone, soi: row.soi, house: row.house,
       chips: row.chips, extra: row.extra,
     },
     status: row.status,

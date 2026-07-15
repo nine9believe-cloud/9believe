@@ -491,12 +491,13 @@ export function BottomFixedButton({
   secondaryProps?: Record<string, unknown>;
   style?: CSS;
 }) {
-  return (
-    <div style={{
-      background: "var(--bg-primary)", borderTop: "1px solid var(--border-primary)",
-      padding: "16px 16px 0", display: "flex", flexDirection: "column", alignItems: "center",
-      boxSizing: "border-box", flexShrink: 0, ...style,
-    }}>
+  const barStyle: CSS = {
+    background: "var(--bg-primary)", borderTop: "1px solid var(--border-primary)",
+    padding: "16px 16px 0", display: "flex", flexDirection: "column", alignItems: "center",
+    boxSizing: "border-box", flexShrink: 0, ...style,
+  };
+  const content = (
+    <>
       <div style={{ display: "flex", gap: 16, width: "100%" }}>
         {secondaryLabel ? (
           <Button variant="outlined" fullWidth onClick={onSecondary} {...secondaryProps}>{secondaryLabel}</Button>
@@ -505,7 +506,18 @@ export function BottomFixedButton({
       </div>
       <div style={{ height: 16 }} />
       <div style={{ height: "env(safe-area-inset-bottom, 0px)" }} />
-    </div>
+    </>
+  );
+  return (
+    <>
+      {/* spacer: keeps the same footprint in normal flow so scrolling content
+          isn't hidden behind the fixed bar below */}
+      <div aria-hidden style={{ ...barStyle, visibility: "hidden", pointerEvents: "none" }}>{content}</div>
+      {/* the sheet's own transform (see DetailSheet) makes it the containing
+          block here, so this pins to the sheet's bottom instead of the
+          viewport's when rendered inside it */}
+      <div style={{ ...barStyle, position: "fixed", left: 0, right: 0, bottom: 0, zIndex: 30 }}>{content}</div>
+    </>
   );
 }
 

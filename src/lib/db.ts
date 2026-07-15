@@ -34,6 +34,7 @@ async function ensureSchema(): Promise<void> {
       total INTEGER NOT NULL,
       name TEXT NOT NULL,
       phone TEXT NOT NULL,
+      soi TEXT NOT NULL DEFAULT '',
       house TEXT NOT NULL,
       chips JSONB NOT NULL DEFAULT '[]',
       extra TEXT NOT NULL DEFAULT '',
@@ -66,6 +67,12 @@ async function ensureSchema(): Promise<void> {
       sort INTEGER NOT NULL DEFAULT 0,
       active BOOLEAN NOT NULL DEFAULT true
     );
+    CREATE TABLE IF NOT EXISTS categories (
+      id TEXT PRIMARY KEY,
+      label TEXT NOT NULL,
+      sort INTEGER NOT NULL DEFAULT 0
+    );
+    ALTER TABLE orders ADD COLUMN IF NOT EXISTS soi TEXT NOT NULL DEFAULT '';
   `);
 }
 
