@@ -399,7 +399,7 @@ export function Toast() {
   if (!toast) return null;
   return (
     <div style={{
-      position: "fixed", left: 0, right: 0, top: 24, zIndex: 60,
+      position: "fixed", left: 0, right: 0, top: "calc(env(safe-area-inset-top, 0px) + 24px)", zIndex: 60,
       display: "flex", justifyContent: "center", pointerEvents: "none",
     }}>
       <div style={{
