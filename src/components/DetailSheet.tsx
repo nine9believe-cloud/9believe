@@ -150,9 +150,9 @@ function SheetInner({ id, onClose, closed }: { id: string; onClose: () => void; 
             </div>
 
             <Textarea
-              label="หมายเหตุถึงร้าน" rows={2} value={note}
+              label="หมายเหตุถึงร้าน (ถ้ามี)" rows={2} value={note}
               onChange={(e) => setNote(e.target.value)}
-              placeholder="ถ้ามี"
+              placeholder="บอกเราได้เลย"
             />
           </div>
         </div>

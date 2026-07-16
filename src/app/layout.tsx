@@ -2,8 +2,8 @@ import type { Metadata, Viewport } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "9believe — สั่งเครื่องดื่ม",
-  description: "สั่งมัจฉะและชานมจากร้าน 9believe ส่งถึงหน้าบ้าน",
+  title: "9 Matcha — สั่งเครื่องดื่ม",
+  description: "สั่งมัจฉะและชานมจากร้าน ส่งถึงหน้าบ้าน",
   icons: { icon: "/images/9believe-logo-mark.png" },
 };
 
