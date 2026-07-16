@@ -3,8 +3,12 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: "9 Matcha — สั่งเครื่องดื่ม",
-  description: "สั่งมัจฉะและชานมจากร้าน ส่งถึงหน้าบ้าน",
+  description: "สั่งมัจฉะและชานมจากร้าน ส่งถึงหน้าบ้านคุณ",
   icons: { icon: "/images/9believe-logo-mark.png" },
+  openGraph: {
+    title: "9 Matcha — สั่งเครื่องดื่ม",
+    description: "สั่งมัจฉะและชานมจากร้าน ส่งถึงหน้าบ้านคุณ",
+  },
 };
 
 export const viewport: Viewport = {
