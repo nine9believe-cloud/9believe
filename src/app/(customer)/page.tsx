@@ -34,11 +34,9 @@ export default function HomePage() {
 
   return (
     <div style={{ display: "flex", flexDirection: "column", minHeight: "100%" }}>
-      {/* header card — background spans from the very top edge (behind the
-          status bar/notch) through the header content, as one container */}
+      {/* header — no background, just padding to clear the status bar/notch */}
       <div style={{
-        background: "var(--bg-primary)", borderRadius: "0 0 28px 28px",
-        padding: "calc(env(safe-area-inset-top, 0px) + 8px) 16px 18px", boxShadow: "var(--shadow-xs)",
+        padding: "calc(env(safe-area-inset-top, 0px) + 8px) 16px 18px",
       }}>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
           <Logo height={44} />

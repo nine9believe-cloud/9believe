@@ -37,7 +37,7 @@ export const STEPS: { id: OrderStatus; label: string; icon: string; msg: string 
 
 export const STATUS_ORDER: OrderStatus[] = ["verify", "brewing", "prepare", "deliver", "done"];
 
-export const NOTE_CHIPS = ["ไม่ต้องกดกริ่ง", "วางหน้าบ้าน", "โทรก่อนส่ง"];
+export const NOTE_CHIPS = ["ไม่ต้องกดกริ่ง", "วางหน้าบ้าน", "ถึงแล้วเรียกได้"];
 
 /* ---- Cart / order line ---- */
 
