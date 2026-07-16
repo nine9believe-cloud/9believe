@@ -197,17 +197,31 @@ export function ListSkeleton() {
 /* ---------- back bar ---------- */
 
 export function BackBar({ title, onBack, trailing }: { title: string; onBack: () => void; trailing?: React.ReactNode }) {
+  const leading = (
+    <IconButtonCircle type="ghost" size="sm" aria-label="ย้อนกลับ" onClick={onBack}>
+      <Icon name="arrow-left-01" size={24} />
+    </IconButtonCircle>
+  );
   return (
-    <TopAppBar
-      title={title}
-      style={{ background: "var(--bg-secondary)", flexShrink: 0, position: "sticky", top: 0, zIndex: 20 }}
-      leading={
-        <IconButtonCircle type="ghost" size="sm" aria-label="ย้อนกลับ" onClick={onBack}>
-          <Icon name="arrow-left-01" size={24} />
-        </IconButtonCircle>
-      }
-      trailing={trailing || null}
-    />
+    <>
+      {/* spacer: reserves the header's exact height (varies with safe-area)
+          in normal flow so content doesn't jump up under the fixed bar below */}
+      <div aria-hidden style={{ visibility: "hidden", pointerEvents: "none" }}>
+        <TopAppBar title={title} leading={leading} trailing={trailing || null} />
+      </div>
+      {/* truly fixed (not sticky) — sticky silently breaks if any ancestor
+          sets a non-"visible" overflow (e.g. .app-shell's overflow-x: hidden),
+          so fixed is the only guarantee the header never scrolls with content */}
+      <TopAppBar
+        title={title}
+        leading={leading}
+        trailing={trailing || null}
+        style={{
+          background: "var(--bg-secondary)", position: "fixed", top: 0, left: 0, right: 0,
+          maxWidth: 430, margin: "0 auto", zIndex: 20,
+        }}
+      />
+    </>
   );
 }
 

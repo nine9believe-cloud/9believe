@@ -31,6 +31,18 @@ function SheetInner({ id, onClose, closed }: { id: string; onClose: () => void; 
     return () => clearTimeout(timer);
   }, []);
 
+  /* Tint the browser chrome/status-bar strip to roughly match the dim
+     overlay while the sheet is open — browsers that honor theme-color for
+     their own UI (notably iOS Safari) will otherwise leave that strip
+     showing the page's normal (undimmed) background, since it sits outside
+     the document's own paintable area. */
+  React.useEffect(() => {
+    const meta = document.querySelector('meta[name="theme-color"]');
+    const prev = meta?.getAttribute("content") ?? null;
+    meta?.setAttribute("content", "#6b7280");
+    return () => { if (prev !== null) meta?.setAttribute("content", prev); };
+  }, []);
+
   if (!item) return null;
   const unit = item.price + (oat ? OAT_EXTRA : 0);
   const close = () => { setShown(false); setTimeout(onClose, 280); };
