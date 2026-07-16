@@ -174,7 +174,7 @@ function Dashboard({ onLogout }: { onLogout: () => void }) {
       {/* header */}
       <div style={{
         background: "var(--bg-primary)", borderRadius: "0 0 28px 28px",
-        padding: "calc(env(safe-area-inset-top, 0px) + 14px) 16px 18px", boxShadow: "var(--shadow-xs)",
+        padding: "14px 16px 18px", boxShadow: "var(--shadow-xs)",
       }}>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
           <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
